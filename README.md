@@ -81,6 +81,10 @@ Packistry is built on a solid foundation of well-maintained dependencies from bo
 - **[Tailwind CSS](https://tailwindcss.com/)**: A utility-first CSS framework that streamlines the styling process by providing a highly customizable and responsive design system.
 - **[Vite](https://vitejs.dev/)**: A fast and efficient build tool that enhances the development experience by providing lightning-fast hot module replacement and optimized builds.
 
+## Contributing
+
+Want to contribute? See [CONTRIBUTING.md](./CONTRIBUTING.md) for running the local development stack and the checks your pull request needs to pass.
+
 ## Security Vulnerabilities
 
 Please review [our security policy](./SECURITY.md) on how to report security vulnerabilities.

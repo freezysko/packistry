@@ -14,9 +14,10 @@ export default defineConfig({
     },
     server: {
         // keeps the API on the same origin as the app, like in production, so no CORS is involved
+        // VITE_API_PROXY overrides the target, e.g. http://web:8000 in the Docker dev stack
         proxy: {
             '/api': {
-                target: 'http://localhost',
+                target: process.env.VITE_API_PROXY ?? 'http://localhost',
                 changeOrigin: true,
             },
         },

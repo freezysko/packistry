@@ -1,0 +1,51 @@
+# Development override, use together with docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# or set COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml in .env. See CONTRIBUTING.md.
+services:
+    web:
+        command: sh -c "composer install --no-interaction && php artisan migrate --force && php artisan serve --host=0.0.0.0"
+        environment:
+            APP_ENV: local
+            APP_DEBUG: true
+            DB_HOST: database
+        depends_on:
+            database:
+                condition: service_healthy
+        healthcheck:
+            test: ['CMD', 'curl', '-fs', 'http://localhost:8000/up']
+            interval: 5s
+            timeout: 5s
+            retries: 60
+            # the first composer install can take a while
+            start_period: 10m
+    worker:
+        restart: unless-stopped
+        build:
+            context: .
+            target: base
+        volumes:
+            - '.:/var/www/html:delegated'
+        environment:
+            APP_ENV: local
+            APP_DEBUG: true
+            DB_HOST: database
+        command: 'php artisan queue:work --tries=3'
+        depends_on:
+            web:
+                condition: service_healthy
+    frontend:
+        image: 'node:26-slim'
+        working_dir: /var/www/html/frontend
+        volumes:
+            - '.:/var/www/html:delegated'
+            # keeps the container's Linux node_modules separate from the host's
+            - /var/www/html/frontend/node_modules
+        environment:
+            VITE_API_PROXY: 'http://web:8000'
+            # keeps pnpm's store out of the repository
+            npm_config_store_dir: /pnpm-store
+        command: sh -c "npm install -g pnpm@10 && pnpm install --frozen-lockfile && pnpm dev --host"
+        ports:
+            - '5173:5173'
+        depends_on:
+            - web
